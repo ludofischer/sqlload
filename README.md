@@ -1,13 +1,15 @@
-SQL loader
+SQL Loader
 ==========
 
-SQL loader uses a directory hierarchy containing SQL scrips as an input to load test data into a database.
+SQL Loader executes SQL scripts contained in a directory hierarchy into a PostgreSQL database.
 
 Usage
 -----
-Takes the directory to load data from as a command line argument.
+If it is not there already, install the pg gem to be able to connect to the PostgreSQL database.
 
-If you supply destroy scripts, SQL loader will use them to reset the database state.
+The script will execute all files in an 'SQL' directory in the same directory as itself. The order of execution by sorting the filenames.
+
+Connection information can be passed to the script with named arguments. The syntax is meant to be the same as the psql command line utility.
 
 Copyright 2012 Ludovico Fischer
 
