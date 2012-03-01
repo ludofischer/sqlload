@@ -87,3 +87,5 @@ require 'pg'
 conn = PG.connect(:host => 'localhost', :port => port, :dbname => dbname, :user => user, :password => password)
 
 statements.each { |statement| conn.exec(statement) }
+
+conn.finish
