@@ -20,7 +20,7 @@ module Tasks
     datasets = []
     
     Find.find(directory)  do |path|
-      unless FileTest.directory?(path)
+     if File.extname(path) == '.sql'
         datasets.push(path)
       end
     end
@@ -45,7 +45,10 @@ module Tasks
 
   def self.load_dataset(directory, db_connection)
     statements = self.get_statements(self.get_datasets(directory))
-    statements.each { |statement| db_connection.exec(statement) }
+    statements.each do |statement| 
+      result = db_connection.exec(statement)
+      puts result.cmd_status
+    end
   end
 
   def self.delete_dataset(directory, db_connection)
@@ -87,6 +90,18 @@ module User
   end
 end
 
+module DBConfig
+  def self.load(path)
+    require 'json'
+
+    config = JSON.parse(File.read(self.get_config_path(path)), :symbolize_names => true)
+  end
+
+  def self.get_config_path(dataset_path)
+    File.join(dataset_path, 'config.json')
+  end
+end
+
 module DB
   require 'pg'
   def self.get_db_connection(options)
@@ -113,14 +128,16 @@ when 'list'
   Tasks.list_available_datasets
 when 'load'
   dataset = ARGV[1]
+  options = DBConfig.load(dataset).merge(user_options)
   if dataset.nil? then abort 'You must specify a dataset to load' end
-  DB.get_db_connection(user_options) do |db_connection|
+  DB.get_db_connection(options) do |db_connection|
     Tasks.load_dataset(dataset, db_connection)
   end
 when 'reset'
   dataset = ARGV[1]
+  options = DBconfig.load(dataset).merge(user_options)
   if dataset.nil? then abort 'You must specify a dataset to reset' end
-  DB.get_db_connection(user_options) do |db_connection|
+  DB.get_db_connection(options) do |db_connection|
     Tasks.delete_dataset(dataset, db_connection)
     Tasks.load_dataset(dataset, db_connection)
   end
