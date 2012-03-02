@@ -31,7 +31,7 @@ module Tasks
     datasets
   end
 
-  def get_statements(datasets)
+  def self.get_statements(datasets)
     statements = []
     datasets.each do |dataset|
       statements.push File.read(dataset)
@@ -41,6 +41,14 @@ module Tasks
 
   def self.list_available_datasets
     puts self.get_datasets
+  end
+
+  def self.load_datasets(directory, db_connection)
+    statements = self.get_statements(self.get_datasets(directory))
+    statements.each { |statement| db_connection.exec(statement) }
+  end
+
+  def self.delete_datasets(directory, db_connection)
   end
 end
 
@@ -79,35 +87,38 @@ module User
   end
 end
 
-options = User.get_commandline_options(ARGV)
+module DB
+  require 'pg'
+  def self.get_db_connection(options)
+    dbname = options[:dbname]
+    unless dbname
+      abort  "You must specify a database name"
+    end
+    user = options.fetch(:user, dbname)
+    password = options[:password]
+    port = options.fetch(:port, 5432)
+    return PG.connect(:host => 'localhost', :port => port, :dbname => dbname, :user => user, :password => password)
+  end
+end
+
+user_options = User.get_commandline_options(ARGV)
 
 case ARGV[0]
-  when 'list'
+when 'list'
   Tasks.list_available_datasets
-  when 'load'
-  Tasks.load_dataset(ARGV[1])
-  when 'reset'
-  Tasks.delete_dataset(ARGV[1])
-  Tasks.load_dataset(ARGV[1])
-  else abort 'You must specify one of list, load or reset.'
+when 'load'
+  dataset = ARGV[1]
+  if dataset.nil? then abort 'You must specify a dataset to load' end
+  db_connection = DB.get_db_connection(user_options)
+  Tasks.load_dataset(dataset, db_connection)
+  db_connection.finish
+when 'reset'
+  dataset = ARGV[1]
+  if dataset.nil? then abort 'You must specify a dataset to reset' end
+  db_connection = DB.get_db_connection(user_options)
+  Tasks.delete_dataset(dataset, db_connection)
+  Tasks.load_dataset(dataset, db_connection)
+  db_connection.finish
+else abort 'You must specify one of list, load or reset.'
 end
 
-dbname = options[:dbname]
-  
-unless dbname
-  abort  "You must specify a database name"
-end
-
-user = options.fetch(:user, dbname)
-password = options[:password]
-port = options.fetch(:port, 5432)
-
-statements = get_statements(get_datasets)
-
-require 'pg'
-
-conn = PG.connect(:host => 'localhost', :port => port, :dbname => dbname, :user => user, :password => password)
-
-statements.each { |statement| conn.exec(statement) }
-
-conn.finish
