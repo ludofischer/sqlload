@@ -122,21 +122,20 @@ module DB
 end
 
 user_options = User.get_commandline_options(ARGV)
+dataset = ARGV[1]
 
 case ARGV[0]
 when 'list'
   Tasks.list_available_datasets
 when 'load'
-  dataset = ARGV[1]
-  options = DBConfig.load(dataset).merge(user_options)
   if dataset.nil? then abort 'You must specify a dataset to load' end
+  options = DBConfig.load(dataset).merge(user_options)
   DB.get_db_connection(options) do |db_connection|
     Tasks.load_dataset(dataset, db_connection)
   end
 when 'reset'
-  dataset = ARGV[1]
-  options = DBconfig.load(dataset).merge(user_options)
   if dataset.nil? then abort 'You must specify a dataset to reset' end
+  options = DBconfig.load(dataset).merge(user_options)
   DB.get_db_connection(options) do |db_connection|
     Tasks.delete_dataset(dataset, db_connection)
     Tasks.load_dataset(dataset, db_connection)
