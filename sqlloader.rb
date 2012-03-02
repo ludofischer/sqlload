@@ -14,78 +14,81 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-
-def get_datasets(directory = 'SQL')
-  require 'find'
-  datasets = []
-  
-  Find.find(directory)  do |path|
-    unless FileTest.directory?(path)
-      datasets.push(path)
+module Tasks
+  def self.get_datasets(directory = 'SQL')
+    require 'find'
+    datasets = []
+    
+    Find.find(directory)  do |path|
+      unless FileTest.directory?(path)
+        datasets.push(path)
+      end
     end
-  end
-  
-  datasets.sort! do |x, y|
-    File.basename(x) <=> File.basename(y)
-  end
-  datasets
-end
-
-def get_statements(datasets)
-  statements = []
-  datasets.each do |dataset|
-    statements.push File.read(dataset)
-  end
-  statements
-end
-
-def list_available_datasets
-  puts get_datasets
-end
-
-def get_commandline_options(command_string)
-  require 'optparse'
-
-  options = {}
-
-  optparse = OptionParser.new do |opts|
-    opts.on('-U', '--user USERNAME', 'Specify username') do |user|
-      options[:user] = user
+    
+    datasets.sort! do |x, y|
+      File.basename(x) <=> File.basename(y)
     end
-
-    opts.on('-W', '--password PASSWORD', 'Specify password') do |password|
-      options[:password] = password
-    end
-
-    opts.on('-d', '--database DBNAME', 'Specify database name') do |dbname|
-      options[:dbname] = dbname
-    end
-
-    opts.on('-p', '--port PORT', 'Specify port') do |port|
-      options[:port] = port
-    end
-
-    opts.on('-h', '--help', 'Print usage') do
-      puts opts
-      exit
-    end
+    datasets
   end
 
-  optparse.parse!(command_string)
+  def get_statements(datasets)
+    statements = []
+    datasets.each do |dataset|
+      statements.push File.read(dataset)
+    end
+    statements
+  end
 
-  options
+  def self.list_available_datasets
+    puts self.get_datasets
+  end
 end
 
-options = get_commandline_options(ARGV)
+module User
+  def self.get_commandline_options(command_string)
+    require 'optparse'
+
+    options = {}
+
+    optparse = OptionParser.new do |opts|
+      opts.on('-U', '--user USERNAME', 'Specify username') do |user|
+        options[:user] = user
+      end
+
+      opts.on('-W', '--password PASSWORD', 'Specify password') do |password|
+        options[:password] = password
+      end
+
+      opts.on('-d', '--database DBNAME', 'Specify database name') do |dbname|
+        options[:dbname] = dbname
+      end
+
+      opts.on('-p', '--port PORT', 'Specify port') do |port|
+        options[:port] = port
+      end
+
+      opts.on('-h', '--help', 'Print usage') do
+        puts opts
+        exit
+      end
+    end
+
+    optparse.parse!(command_string)
+    options
+
+  end
+end
+
+options = User.get_commandline_options(ARGV)
 
 case ARGV[0]
   when 'list'
-  list_available_datasets
+  Tasks.list_available_datasets
   when 'load'
-  load_dataset(ARGV[1])
+  Tasks.load_dataset(ARGV[1])
   when 'reset'
-  delete_dataset(ARGV[1])
-  load_dataset(ARGV[1])
+  Tasks.delete_dataset(ARGV[1])
+  Tasks.load_dataset(ARGV[1])
   else abort 'You must specify one of list, load or reset.'
 end
 
