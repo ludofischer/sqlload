@@ -43,12 +43,12 @@ module Tasks
     puts self.get_datasets
   end
 
-  def self.load_datasets(directory, db_connection)
+  def self.load_dataset(directory, db_connection)
     statements = self.get_statements(self.get_datasets(directory))
     statements.each { |statement| db_connection.exec(statement) }
   end
 
-  def self.delete_datasets(directory, db_connection)
+  def self.delete_dataset(directory, db_connection)
   end
 end
 
