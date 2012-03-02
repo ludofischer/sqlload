@@ -101,7 +101,7 @@ module DB
       db_connection = PG.connect(:host => 'localhost', :port => port, :dbname => dbname, :user => user, :password => password)
       yield db_connection
     ensure
-      db_connection.finish
+      db_connection.finish unless db_connection.nil?
     end
   end
 end
