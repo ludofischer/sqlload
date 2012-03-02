@@ -97,7 +97,12 @@ module DB
     user = options.fetch(:user, dbname)
     password = options[:password]
     port = options.fetch(:port, 5432)
-    return PG.connect(:host => 'localhost', :port => port, :dbname => dbname, :user => user, :password => password)
+    begin
+      db_connection = PG.connect(:host => 'localhost', :port => port, :dbname => dbname, :user => user, :password => password)
+      yield db_connection
+    ensure
+      db_connection.finish
+    end
   end
 end
 
@@ -109,16 +114,16 @@ when 'list'
 when 'load'
   dataset = ARGV[1]
   if dataset.nil? then abort 'You must specify a dataset to load' end
-  db_connection = DB.get_db_connection(user_options)
-  Tasks.load_dataset(dataset, db_connection)
-  db_connection.finish
+  DB.get_db_connection(user_options) do |db_connection|
+    Tasks.load_dataset(dataset, db_connection)
+  end
 when 'reset'
   dataset = ARGV[1]
   if dataset.nil? then abort 'You must specify a dataset to reset' end
-  db_connection = DB.get_db_connection(user_options)
-  Tasks.delete_dataset(dataset, db_connection)
-  Tasks.load_dataset(dataset, db_connection)
-  db_connection.finish
+  DB.get_db_connection(user_options) do |db_connection|
+    Tasks.delete_dataset(dataset, db_connection)
+    Tasks.load_dataset(dataset, db_connection)
+  end
 else abort 'You must specify one of list, load or reset.'
 end
 
