@@ -41,34 +41,40 @@ def get_statements(jobs)
   statements
 end
 
-require 'optparse'
+def get_commandline_options(command_string)
+  require 'optparse'
 
-options = {}
+  options = {}
 
-optparse = OptionParser.new do |opts|
-  opts.on('-U', '--user USERNAME', 'Specify username') do |user|
-    options[:user] = user
+  optparse = OptionParser.new do |opts|
+    opts.on('-U', '--user USERNAME', 'Specify username') do |user|
+      options[:user] = user
+    end
+
+    opts.on('-W', '--password PASSWORD', 'Specify password') do |password|
+      options[:password] = password
+    end
+
+    opts.on('-d', '--database DBNAME', 'Specify database name') do |dbname|
+      options[:dbname] = dbname
+    end
+
+    opts.on('-p', '--port PORT', 'Specify port') do |port|
+      options[:port] = port
+    end
+
+    opts.on('-h', '--help', 'Print usage') do
+      puts opts
+      exit
+    end
   end
 
-  opts.on('-W', '--password PASSWORD', 'Specify password') do |password|
-    options[:password] = password
-  end
+  optparse.parse!(command_string)
 
-  opts.on('-d', '--database DBNAME', 'Specify database name') do |dbname|
-    options[:dbname] = dbname
-  end
-
-  opts.on('-p', '--port PORT', 'Specify port') do |port|
-    options[:port] = port
-  end
-
-  opts.on('-h', '--help', 'Print usage') do
-    puts opts
-    exit
-  end
+  options
 end
 
-optparse.parse!
+options = get_commandline_options(ARGV)
 
 dbname = options[:dbname]
   
