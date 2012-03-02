@@ -15,30 +15,32 @@
 #    limitations under the License.
 
 
-def get_jobs(directory = 'SQL')
+def get_datasets(directory = 'SQL')
   require 'find'
-  jobs = []
+  datasets = []
   
   Find.find(directory)  do |path|
     unless FileTest.directory?(path)
-      jobs.push(path)
+      datasets.push(path)
     end
   end
   
-  jobs.sort! do |x, y|
+  datasets.sort! do |x, y|
     File.basename(x) <=> File.basename(y)
   end
-  
-  jobs
+  datasets
 end
 
-def get_statements(jobs)
+def get_statements(datasets)
   statements = []
-  jobs.each do |path|
-    statements.push File.read(path)
+  datasets.each do |dataset|
+    statements.push File.read(dataset)
   end
-
   statements
+end
+
+def list_available_datasets
+  puts get_datasets
 end
 
 def get_commandline_options(command_string)
@@ -76,6 +78,17 @@ end
 
 options = get_commandline_options(ARGV)
 
+case ARGV[0]
+  when 'list'
+  list_available_datasets
+  when 'load'
+  load_dataset(ARGV[1])
+  when 'reset'
+  delete_dataset(ARGV[1])
+  load_dataset(ARGV[1])
+  else abort 'You must specify one of list, load or reset.'
+end
+
 dbname = options[:dbname]
   
 unless dbname
@@ -86,7 +99,7 @@ user = options.fetch(:user, dbname)
 password = options[:password]
 port = options.fetch(:port, 5432)
 
-statements = get_statements(get_jobs)
+statements = get_statements(get_datasets)
 
 require 'pg'
 
