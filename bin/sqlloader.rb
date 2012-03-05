@@ -44,7 +44,7 @@ module Tasks
   end
 
   def self.load_dataset(directory, db_connection)
-    statements = self.get_statements(self.get_datasets(directory)).reject { |s| File.basename(s) == 'reset.sql' }
+    statements = self.get_statements(self.get_datasets(directory).reject { |s| File.basename(s) == 'reset.sql' })
     statements.each do |statement| 
       result = db_connection.exec(statement)
       puts result.cmd_status
@@ -52,7 +52,7 @@ module Tasks
   end
   
   def self.delete_dataset(directory, db_connection)
-    statements = self.get_statements(self.get_datasets(directory)).select { |s| File.basename(s) == 'reset.sql' }
+    statements = self.get_statements(self.get_datasets(directory).select { |s| File.basename(s) == 'reset.sql' })
     statements.each do |statement|
       result = db_connection.exec(statement)
       puts result.cmd_status
