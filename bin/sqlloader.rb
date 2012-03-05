@@ -19,7 +19,9 @@ require 'lib/dataset'
 module Tasks
   def self.get_datasets(directory = 'SQL', user_config)
     datasets = []
-    datasets << DataSet.new(directory, user_config)
+    Dir[File.join(directory, '*')].each do |d|
+      datasets << DataSet.new(d, user_config)
+    end
     datasets
   end
 

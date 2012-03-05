@@ -61,6 +61,9 @@ class DataSet
   end
   
   def reset
+    if @downs.empty?
+       raise ArgumentError, 'There are no reset scripts to run'
+     end
     load
     delete
    end
@@ -75,6 +78,7 @@ class DataSet
    end
 
    def delete
+     
      get_db_connection(@config) do |db_connection|
      @downs.each do |s|
          result = db_connection.exec(s)
