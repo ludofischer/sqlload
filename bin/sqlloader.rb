@@ -13,49 +13,19 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+require 'lib/dataset'
+
 
 module Tasks
-  def self.get_datasets(directory = 'SQL')
-    require 'find'
+  def self.get_datasets(directory = 'SQL', user_config)
     datasets = []
-    
-    Find.find(directory)  do |path|
-     if File.extname(path) == '.sql'
-        datasets.push(path)
-      end
-    end
-    
-    datasets.sort! do |x, y|
-      File.basename(x) <=> File.basename(y)
-    end
+    datasets << DataSet.new(directory, user_config)
     datasets
   end
 
-  def self.get_statements(datasets)
-    statements = []
-    datasets.each do |dataset|
-      statements.push File.read(dataset)
-    end
-    statements
-  end
-
-  def self.list_available_datasets
-    puts self.get_datasets
-  end
-
-  def self.load_dataset(directory, db_connection)
-    statements = self.get_statements(self.get_datasets(directory).reject { |s| File.basename(s) == 'reset.sql' })
-    statements.each do |statement| 
-      result = db_connection.exec(statement)
-      puts result.cmd_status
-    end
-  end
-  
-  def self.delete_dataset(directory, db_connection)
-    statements = self.get_statements(self.get_datasets(directory).select { |s| File.basename(s) == 'reset.sql' })
-    statements.each do |statement|
-      result = db_connection.exec(statement)
-      puts result.cmd_status
+  def self.list_available_datasets(user_options)
+    self.get_datasets(user_options).each do |d|
+      puts d.ups + d.downs
     end
   end
 end
@@ -95,56 +65,20 @@ module User
   end
 end
 
-module DBConfig
-  def self.load(path)
-    require 'json'
-
-    config = JSON.parse(File.read(self.get_config_path(path)), :symbolize_names => true)
-  end
-
-  def self.get_config_path(dataset_path)
-    File.join(dataset_path, 'config.json')
-  end
-end
-
-module DB
-  require 'pg'
-  def self.get_db_connection(options)
-    dbname = options[:dbname]
-    unless dbname
-      abort  "You must specify a database name"
-    end
-    user = options.fetch(:user, dbname)
-    password = options[:password]
-    port = options.fetch(:port, 5432)
-    begin
-      db_connection = PG.connect(:host => 'localhost', :port => port, :dbname => dbname, :user => user, :password => password)
-      yield db_connection
-    ensure
-      db_connection.finish unless db_connection.nil?
-    end
-  end
-end
-
 user_options = User.get_commandline_options(ARGV)
-dataset = ARGV[1]
+dataset_name = ARGV[1]
 
 case ARGV[0]
 when 'list'
-  Tasks.list_available_datasets
+  Tasks.list_available_datasets(user_options)
 when 'load'
-  if dataset.nil? then abort 'You must specify a dataset to load' end
-  options = DBConfig.load(dataset).merge(user_options)
-  DB.get_db_connection(options) do |db_connection|
-    Tasks.load_dataset(dataset, db_connection)
-  end
+  if dataset_name.nil? then abort 'You must specify a dataset to load' end
+  dataset = Dataset.new(dataset_name, user_options)
+  dataset.load
 when 'reset'
   if dataset.nil? then abort 'You must specify a dataset to reset' end
-  options = DBConfig.load(dataset).merge(user_options)
-  DB.get_db_connection(options) do |db_connection|
-    Tasks.delete_dataset(dataset, db_connection)
-    Tasks.load_dataset(dataset, db_connection)
-  end
+  dataset = Dataset.new(dataset_name, user_options)
+  dataset.reset
 else abort 'You must specify one of list, load or reset.'
 end
 
