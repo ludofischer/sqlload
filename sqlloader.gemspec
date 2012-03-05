@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "sqlloader"
-  s.version = "0.0.2"
+  s.version = "0.0.3"
   s.license = 'Apache License, Version 2.0'
   s.summary = 'Load and execute SQL from a directory hierarchy. Only supports PostgreSQL'
   s.description = 'sqlloader inspects a directory hierarchy: for each subdirectoyr, sqlloader offers to execute any SQL file, using the database specified in the JSON configuration.'
@@ -8,4 +8,6 @@ Gem::Specification.new do |s|
   s.email = 'ludovico.fischer@lunatech.com'
   s.homepage = 'https://github.com/ludovicofischer/sqlloader'
   s.add_runtime_dependency 'pg'
+  s.files = ['lib/sqlloader.rb']
+  s.executables << 'sqlload'
 end

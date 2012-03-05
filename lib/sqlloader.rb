@@ -12,7 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-
 module DB
   require 'pg'
   def get_db_connection(options)
@@ -49,6 +48,7 @@ end
 class DataSet
   include DBConfig, DB
   attr_accessor :ups, :downs, :config
+
   def initialize(directory, user_config)
     @ups = []
     @downs = []
@@ -114,6 +114,7 @@ class DataSet
    def to_s
      @directory
    end
+
   private
 
   def insufficient(config)
