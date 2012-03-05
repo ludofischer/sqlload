@@ -25,7 +25,7 @@ module Tasks
 
   def self.list_available_datasets(user_options)
     self.get_datasets(user_options).each do |d|
-      puts d.ups + d.downs
+      puts d
     end
   end
 end
@@ -73,11 +73,11 @@ when 'list'
   Tasks.list_available_datasets(user_options)
 when 'load'
   if dataset_name.nil? then abort 'You must specify a dataset to load' end
-  dataset = Dataset.new(dataset_name, user_options)
+  dataset = DataSet.new(dataset_name, user_options)
   dataset.load
 when 'reset'
-  if dataset.nil? then abort 'You must specify a dataset to reset' end
-  dataset = Dataset.new(dataset_name, user_options)
+  if dataset_name.nil? then abort 'You must specify a dataset to reset' end
+  dataset = DataSet.new(dataset_name, user_options)
   dataset.reset
 else abort 'You must specify one of list, load or reset.'
 end
