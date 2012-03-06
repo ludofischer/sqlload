@@ -24,8 +24,21 @@ sqlload will look below the SQL directory in the directory where it is executed.
 
 You can override the connection information by passing named command line arguments. The syntax is meant to be the same as the psql command line utility.
 
+Configuration
+-------------
 
+Configuration is per dataset. You can place a config.json file in the dataset directory, where you can override the following properties:
 
+ * host
+ * port
+ * dbname
+ * username
+ * password
+
+Example config.json:
+
+    { "dbname": "bar", "username": "foo" }
+    
 Copyright
 ---------
 Copyright 2012 Ludovico Fischer
