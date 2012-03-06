@@ -5,12 +5,29 @@ SQL Loader executes SQL scripts contained in a directory hierarchy into a Postgr
 
 Usage
 -----
-If it is not there already, install the pg gem to be able to connect to the PostgreSQL database.
+In the sqlloader directory, execute `gem build`, then `gem install` to make the gem available to your Ruby installation.
 
-The script will execute all files in an 'SQL' directory in the same directory as itself. The order of execution by sorting the filenames.
+You will then be able to use the _sqlload_ command-line utility to automate the execution of SQL scripts. 
 
-Connection information can be passed to the script with named arguments. The syntax is meant to be the same as the psql command line utility.
+You must supply a directory layout similar to this:
 
+SQL/
+   Dataset1/1.sql
+   Dataset1/config.json
+   Dataset2/reset.sql
+
+sqlload will look below the SQL directory in the directory where it is executed. Each subdirectory regroups a collection of SQL scripts and a configuration file in JSON format that describes how to connect to the database.
+
+* sqlload list will list the datasets.
+* sqlload load [dataset name] will execute the sql scripts in that dataset ordered by filename, except the 'reset.sql' one
+* sqlload reset [dataset name] will execute the 'reset.sql' script, then the others
+
+You can override the connection information by passing named command line arguments. The syntax is meant to be the same as the psql command line utility.
+
+
+
+Copyright
+---------
 Copyright 2012 Ludovico Fischer
 
 Licensed under the Apache License, Version 2.0 (the "License");
