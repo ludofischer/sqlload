@@ -51,8 +51,8 @@ class DataSet
    def load
      get_db_connection(@config) do |db_connection|
        @ups.each do |s|
-         result = db_connection.exec(s)
-         puts result.cmd_status
+         result = db_connection.exec(s.statement)
+         puts "#{s.filename}: #{result.cmd_status}"
        end
      end
    end
@@ -62,8 +62,8 @@ class DataSet
    def delete
      get_db_connection(@config) do |db_connection|
      @downs.each do |s|
-         result = db_connection.exec(s)
-         puts result.cmd_status
+         result = db_connection.exec(s.statement)
+         puts "#{s.filename}: #{result.cmd_status}"
        end
      end
    end
@@ -73,30 +73,26 @@ class DataSet
    end
 
   private
-   
+
+   DataPiece = Struct.new :filename, :statement
+
    # Fills the list of statements to execute from the information
    # found by inspecting the directory contents
    def populate()
      require 'find'
-     upfiles = []
-     downfiles = []
      Find.find(@directory) do |path|
-       if is_downs(path)
-           downfiles.push(path)
-       elsif is_ups(path)
-         upfiles.push(path)
+       if File.file?(path) && File.extname(path) == '.sql'
+         data = DataPiece.new(path, File.read(path))
+         if is_downs path
+           @downs << data
+         elsif is_ups path
+           @ups << data
+         end
        end
-    end
-    upfiles.sort! do |x, y|
-      File.basename(x) <=> File.basename(y)
-    end
-    
-    upfiles.each do |f|
-      @ups <<  File.read(f)
-    end
-    
-    downfiles.each do |f|
-       @downs << File.read(f)
+     end
+     
+     @ups.sort! do |x, y|
+       File.basename(x.filename) <=> File.basename(y.filename)
      end
    end
 
