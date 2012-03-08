@@ -17,18 +17,31 @@ require 'sqlloader'
 
 
 module Tasks
-  def self.get_datasets(directory = 'SQL', user_config)
+  BASE_DIRECTORY = 'SQL'
+  def self.get_datasets()
     datasets = []
-    Dir[File.join(directory, '*')].each do |d|
-      datasets << DataSet.new(d, user_config)
+    Dir[File.join(BASE_DIRECTORY, '*')].each do |d|
+      datasets << DataSet.new(d)
     end
     datasets
   end
 
-  def self.list_available_datasets(user_options)
-    self.get_datasets(user_options).each do |d|
-      puts d
+  def self.list_available_datasets()
+    self.get_datasets().each do |d|
+      puts File.basename(d.directory)
     end
+  end
+
+  def self.load_dataset(dataset_name, user_options)
+    if dataset_name.nil? then abort 'You must specify a dataset to load' end
+    dataset = DataSet.new(File.join(BASE_DIRECTORY, dataset_name), user_options)
+    dataset.load
+  end
+
+  def self.reset_dataset(dataset_name, user_options)
+    if dataset_name.nil? then abort 'You must specify a dataset to reset' end
+    dataset = DataSet.new(File.join(BASE_DIRECTORY, dataset_name), user_options)
+    dataset.reset
   end
 end
 
@@ -72,15 +85,11 @@ dataset_name = ARGV[1]
 
 case ARGV[0]
 when 'list'
-  Tasks.list_available_datasets(user_options)
+  Tasks.list_available_datasets
 when 'load'
-  if dataset_name.nil? then abort 'You must specify a dataset to load' end
-  dataset = DataSet.new(dataset_name, user_options)
-  dataset.load
+  Tasks.load_dataset(dataset_name, user_options)
 when 'reset'
-  if dataset_name.nil? then abort 'You must specify a dataset to reset' end
-  dataset = DataSet.new(dataset_name, user_options)
-  dataset.reset
+  Tasks.reset_dataset(dataset_name, user_options)
+  
 else abort 'You must specify one of list, load or reset.'
 end
-

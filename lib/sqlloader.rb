@@ -52,16 +52,16 @@ module DBConfig
 end
 
 ## 
-# A collection of SQL scripts that can be executed together
+# A collection of data that can be inserted together into a database
 class DataSet
   include DBConfig, DB
-  attr_accessor :ups, :downs, :config
+  attr_accessor :ups, :downs, :config, :directory
 
   ##
   # Creates a dataset using the SQL and the configuration contained
   # in directory. The supplied user configuration overrides
   # the configuration contained in the directory
-  def initialize(directory, user_config)
+  def initialize(directory, user_config = {})
     @ups = []
     @downs = []
     @directory = directory
@@ -106,7 +106,7 @@ class DataSet
    end
 
    def to_s
-     @directory
+     File.basename(@directory)
    end
 
   private
