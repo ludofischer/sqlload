@@ -14,6 +14,9 @@
 
 module DB
   require 'pg'
+  ##
+  # Yields a database connection configured with the supplied options.
+  # This method will attempt to close the connection once the block terminates.
   def get_db_connection(options)
     dbname = options[:dbname]
     unless dbname
@@ -33,6 +36,10 @@ end
 
 
 module DBConfig
+  ##
+  # Generates a configuration hash from a JSON file
+  #
+  # [path] the path to the dataset to load a config for 
   def load_config(path)
     require 'json'
 
@@ -44,11 +51,16 @@ module DBConfig
   end
 end
 
-
+## 
+# A collection of SQL scripts that can be executed together
 class DataSet
   include DBConfig, DB
   attr_accessor :ups, :downs, :config
 
+  ##
+  # Creates a dataset using the SQL and the configuration contained
+  # in directory. The supplied user configuration overrides
+  # the configuration contained in the directory
   def initialize(directory, user_config)
     @ups = []
     @downs = []
@@ -60,6 +72,9 @@ class DataSet
     end
   end
   
+  ##
+  # If there are reset scripts available,
+  # executes them before executing once again the regular scripts
   def reset
     if @downs.empty?
        raise ArgumentError, 'There are no reset scripts to run'
@@ -68,6 +83,8 @@ class DataSet
     delete
    end
 
+   ##
+   # Executes the SQL scripts associated with the dataset.
    def load
      get_db_connection(@config) do |db_connection|
        @ups.each do |s|
@@ -76,9 +93,10 @@ class DataSet
        end
      end
    end
-
+   
+   ##
+   # Executes the SQL scripts marked as reset scripts
    def delete
-     
      get_db_connection(@config) do |db_connection|
      @downs.each do |s|
          result = db_connection.exec(s)
@@ -87,6 +105,14 @@ class DataSet
      end
    end
 
+   def to_s
+     @directory
+   end
+
+  private
+   
+   # Fills the list of statements to execute from the information
+   # found by inspecting the directory contents
    def populate()
      require 'find'
      upfiles = []
@@ -110,13 +136,9 @@ class DataSet
        @downs << File.read(f)
      end
    end
-   
-   def to_s
-     @directory
-   end
 
-  private
-
+  # Returns true if the configuration does not contain enough information
+  # to connect to a database 
   def insufficient(config)
     return config[:dbname].nil? 
   end
