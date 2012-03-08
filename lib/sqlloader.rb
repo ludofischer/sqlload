@@ -12,44 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-module DB
-  require 'pg'
-  ##
-  # Yields a database connection configured with the supplied options.
-  # This method will attempt to close the connection once the block terminates.
-  def get_db_connection(options)
-    dbname = options[:dbname]
-    unless dbname
-      abort  "You must specify a database name"
-    end
-    user = options.fetch(:user, dbname)
-    password = options[:password]
-    port = options.fetch(:port, 5432)
-    begin
-      db_connection = PG.connect(:host => 'localhost', :port => port, :dbname => dbname, :user => user, :password => password)
-      yield db_connection
-    ensure
-      db_connection.finish unless db_connection.nil?
-    end
-  end
-end
-
-
-module DBConfig
-  ##
-  # Generates a configuration hash from a JSON file
-  #
-  # [path] the path to the dataset to load a config for 
-  def load_config(path)
-    require 'json'
-
-    config = JSON.parse(File.read(self.get_config_path(path)), :symbolize_names => true)
-  end
-
-  def get_config_path(dataset_path)
-    File.join(dataset_path, 'config.json')
-  end
-end
+require 'sqlloader/database'
 
 ## 
 # A collection of data that can be inserted together into a database

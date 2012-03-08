@@ -52,6 +52,8 @@ module User
     options = {}
 
     optparse = OptionParser.new do |opts|
+      opts.banner = 'Usage: sqlload [options] list|load|reset [dataset]'
+
       opts.on('-U', '--user USERNAME', 'Specify username') do |user|
         options[:user] = user
       end
@@ -68,7 +70,7 @@ module User
         options[:port] = port
       end
 
-      opts.on('-h', '--help', 'Print usage') do
+      opts.on_tail('-h', '--help', 'Displays this message') do
         puts opts
         exit
       end
