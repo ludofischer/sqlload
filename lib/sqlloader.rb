@@ -74,7 +74,7 @@ class DataSet
 
   private
 
-   DataPiece = Struct.new :filename, :statement
+   DataPiece = Struct.new(:filename, :statement)
 
    # Fills the list of statements to execute from the information
    # found by inspecting the directory contents
