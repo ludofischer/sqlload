@@ -3,20 +3,25 @@ require 'sqlloader'
 
 class DataSetTest < Test::Unit::TestCase
 
-  def test
-    directory = 'SQL/test'
-    dataset = DataSet.new(directory, user_config = {})
-    
-    assert !dataset.config.empty?
-
-    assert !dataset.ups.empty?
-    assert dataset.downs.empty?
+  def setup
+    @data_directory = 'samples/SQL/test'
+    @dataset = DataSet.new(@data_directory, user_config = {})
+  end
   
+  def test_configuration
+    assert @dataset.directory == @data_directory
+    assert !@dataset.config.empty?
+    assert !@dataset.ups.empty?
+    assert @dataset.downs.empty?
+  end
+
+  def test_reset
     assert_raise ArgumentError do 
-      dataset.reset
+      @dataset.reset
     end
-    
-    assert dataset.directory == directory
-    dataset.load
+  end    
+
+  def test_load
+    @dataset.load
   end
 end
