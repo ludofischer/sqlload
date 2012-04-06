@@ -42,8 +42,8 @@ class DataSet
     if @downs.empty?
        raise ArgumentError, 'There are no reset scripts to run'
      end
-    load
     delete
+    load
    end
 
    ##

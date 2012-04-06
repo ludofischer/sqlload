@@ -38,6 +38,12 @@ module Tasks
     dataset.load
   end
 
+  def self.delete_dataset(dataset_name, user_options)
+    if dataset_name.nil? then abort 'You must specify a dataset to reset' end
+    dataset = DataSet.new(File.join(BASE_DIRECTORY, dataset_name), user_options)
+    dataset.delete
+  end
+
   def self.reset_dataset(dataset_name, user_options)
     if dataset_name.nil? then abort 'You must specify a dataset to reset' end
     dataset = DataSet.new(File.join(BASE_DIRECTORY, dataset_name), user_options)
@@ -52,7 +58,7 @@ module User
     options = {}
 
     optparse = OptionParser.new do |opts|
-      opts.banner = 'Usage: sqlload [options] list|load|reset [dataset]'
+      opts.banner = 'Usage: sqlload [options] list|load|delete|reset [dataset]'
 
       opts.on('-U', '--user USERNAME', 'Specify username') do |user|
         options[:user] = user
@@ -90,6 +96,8 @@ when 'list'
   Tasks.list_available_datasets
 when 'load'
   Tasks.load_dataset(dataset_name, user_options)
+when 'delete'
+  Tasks.delete_dataset(dataset_name, user_options)
 when 'reset'
   Tasks.reset_dataset(dataset_name, user_options)
   
