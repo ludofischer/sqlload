@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.authors = ['Ludovico Fischer']
   s.email = 'ludovico.fischer@lunatech.com'
   s.homepage = 'https://github.com/ludovicofischer/sqlloader'
-  s.add_runtime_dependency 'pg'
+  s.add_runtime_dependency 'pg', '~> 0.13.0'
   s.files = ['lib/sqlloader.rb', 'lib/sqlloader/database.rb']
   s.executables << 'sqlload'
 end
