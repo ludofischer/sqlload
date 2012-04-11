@@ -60,6 +60,8 @@ module User
     optparse = OptionParser.new do |opts|
       opts.banner = 'Usage: sqlload [options] list|load|delete|reset [dataset]'
 
+      opts.version = '0.2.0'
+
       opts.on('-U', '--user USERNAME', 'Specify username') do |user|
         options[:user] = user
       end
