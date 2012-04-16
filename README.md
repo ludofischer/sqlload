@@ -32,12 +32,12 @@ Configuration is per dataset. You can place a config.json file in the dataset di
  * host
  * port
  * dbname
- * username
+ * user
  * password
 
 Example config.json:
 
-    { "dbname": "bar", "username": "foo" }
+    { "dbname": "bar", "user": "foo" }
     
 Copyright
 ---------
