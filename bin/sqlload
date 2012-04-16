@@ -103,5 +103,5 @@ when 'delete'
 when 'reset'
   Tasks.reset_dataset(dataset_name, user_options)
   
-else abort 'You must specify one of list, load or reset.'
+else abort 'You must specify one of list, load, delete or reset.'
 end
