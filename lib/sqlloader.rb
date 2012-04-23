@@ -13,7 +13,8 @@
 #    limitations under the License.
 
 require 'sqlloader/database'
-require 'open3'
+require 'pty'
+require 'expect'
 
 ## 
 # A collection of data that can be inserted together into a database
@@ -58,11 +59,13 @@ class DataSet
        end
      end
      @raws.each do |s|
-       stdin, stdout, stderr = Open3.popen3("psql -h localhost -U #{@config[:user]} -d #{@config[:dbname]} < #{s.filename}")
-       stdin.puts(@config[:password])
-       stdin.close_write
-       stdout.close
-       stderr.close
+       PTY.spawn("psql -h localhost -U #{@config[:user]} -d #{@config[:dbname]} < #{s.filename}") do |r, w, pid|
+         r.expect("Password") do |match|
+           w.puts(@config[:password])
+         end
+         status = PTY.check(pid)
+         puts status
+       end
      end
    end
    
