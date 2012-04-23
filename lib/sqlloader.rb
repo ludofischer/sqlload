@@ -13,12 +13,13 @@
 #    limitations under the License.
 
 require 'sqlloader/database'
+require 'open3'
 
 ## 
 # A collection of data that can be inserted together into a database
 class DataSet
   include DBConfig, DB
-  attr_accessor :ups, :downs, :config, :directory
+  attr_accessor :ups, :downs, :raws, :config, :directory
 
   ##
   # Creates a dataset using the SQL and the configuration contained
@@ -27,6 +28,7 @@ class DataSet
   def initialize(directory, user_config = {})
     @ups = []
     @downs = []
+    @raws = []
     @directory = directory
     populate() 
     @config = load_config(directory).merge(user_config)
@@ -54,6 +56,13 @@ class DataSet
          result = db_connection.exec(s.statement)
          puts "#{s.filename}: #{result.cmd_status}"
        end
+     end
+     @raws.each do |s|
+       stdin, stdout, stderr = Open3.popen3("psql -h localhost -U #{@config[:user]} -d #{@config[:dbname]} < #{s.filename}")
+       stdin.puts(@config[:password])
+       stdin.close_write
+       stdout.close
+       stderr.close
      end
    end
    
@@ -83,7 +92,9 @@ class DataSet
      Find.find(@directory) do |path|
        if File.file?(path) && File.extname(path) == '.sql'
          data = DataPiece.new(path, File.read(path))
-         if is_downs path
+         if is_raws path
+           @raws << data
+         elsif is_downs path
            @downs << data
          elsif is_ups path
            @ups << data
@@ -99,14 +110,18 @@ class DataSet
   # Returns true if the configuration does not contain enough information
   # to connect to a database 
   def insufficient(config)
-    return config[:dbname].nil? 
+    config[:dbname].nil? 
   end
 
   def is_ups(path)
-    return File.extname(path) == '.sql' && File.basename(path) != 'reset.sql'
+    File.extname(path) == '.sql' && File.basename(path) != 'reset.sql'
   end
 
   def is_downs(path)
-    return File.basename(path) == 'reset.sql'
+    File.basename(path) == 'reset.sql'
+  end
+
+  def is_raws(path)
+    File.fnmatch?('*psql*', path)
   end
 end
