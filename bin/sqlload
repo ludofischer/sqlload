@@ -21,7 +21,9 @@ module Tasks
   def self.get_datasets()
     datasets = []
     Dir[File.join(BASE_DIRECTORY, '*')].each do |d|
-      datasets << DataSet.new(d)
+      if File.directory? d
+        datasets << DataSet.new(d)
+      end
     end
     datasets
   end
