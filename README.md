@@ -38,6 +38,13 @@ Configuration is per dataset. You can place a config.json file in the dataset di
 Example config.json:
 
     { "dbname": "bar", "user": "foo" }
+
+
+Special scripts
+---------------
+Right now, sqlload cannot handle scripts produced by pg_dump that use COPY to restore data into the database. As a workaround, if you place any scripts inside a psql directory inside the directory containing the config.json configuration file, they will be executed by calling psql in a subshell.
+
+!!! Warning: do not use this on your production systems as the password will be passed as the PGPASSWORD environment variable and tools are available to examine the environment variables of running processes.
     
 Copyright
 ---------
