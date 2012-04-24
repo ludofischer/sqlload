@@ -58,15 +58,16 @@ class DataSet
          puts "#{s.filename}: #{result.cmd_status}"
        end
      end
+     psql_count = 0
      @raws.each do |s|
        PTY.spawn("psql -h localhost -U #{@config[:user]} -d #{@config[:dbname]} < #{s.filename}") do |r, w, pid|
          r.expect("Password") do |match|
            w.puts(@config[:password])
          end
-         status = PTY.check(pid)
-         puts status
        end
+       psql_count += 1
      end
+     puts "psql invoked #{psql_count} time(s)"
    end
    
    ##

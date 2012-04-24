@@ -25,7 +25,7 @@ class DataSetTest < Test::Unit::TestCase
   end
 
   def test_psql_scripts
-    assert @dataset.raws.length == 1
+    assert @dataset.raws.length == 1, 'psql scripts are recognized'
   end
   def test_reset
     assert_raise ArgumentError do 
