@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'sqlloader'
+require 'sqlload'
 
 class DataSetTest < Test::Unit::TestCase
 
