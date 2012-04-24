@@ -43,57 +43,53 @@ class DataSet
   # executes them before executing once again the regular scripts
   def reset
     if @downs.empty?
-       raise ArgumentError, 'There are no reset scripts to run'
-     end
+      raise ArgumentError, 'There are no reset scripts to run'
+    end
     delete
     load
-   end
-
-   ##
-   # Executes the SQL scripts associated with the dataset.
-   def load
-     get_db_connection(@config) do |db_connection|
-       @ups.each do |s|
-         result = db_connection.exec(s.statement)
-         puts "#{s.filename}: #{result.cmd_status}"
-       end
-     end
-     psql_count = 0
-     @raws.each do |s|
-       PTY.spawn("psql -h localhost -U #{@config[:user]} -d #{@config[:dbname]} < #{s.filename}") do |r, w, pid|
-         r.expect("Password") do |match|
-           w.puts(@config[:password])
-         end
-       end
-       psql_count += 1
-     end
-     puts "psql invoked #{psql_count} time(s)"
-   end
+  end
+  
+  ##
+  # Executes the SQL scripts associated with the dataset.
+  def load
+    get_db_connection(@config) do |db_connection|
+      @ups.each do |s|
+        result = db_connection.exec(s.statement)
+        puts "#{s.filename}: #{result.cmd_status}"
+      end
+    end
+    psql_count = 0
+    @raws.each do |s|
+      exec({'PGPASSWORD' => @config[:password]}, "psql -h localhost -U #{@config[:user]} -d #{@config[:dbname]} < #{s.filename}")
+      psql_count += 1
+    end
+    puts "psql invoked #{psql_count} time(s)"
+  end
    
-   ##
-   # Executes the SQL scripts marked as reset scripts
-   def delete
-     get_db_connection(@config) do |db_connection|
-     @downs.each do |s|
-         result = db_connection.exec(s.statement)
-         puts "#{s.filename}: #{result.cmd_status}"
-       end
-     end
-   end
-
-   def to_s
-     File.basename(@directory)
-   end
-
+  ##
+  # Executes the SQL scripts marked as reset scripts
+  def delete
+    get_db_connection(@config) do |db_connection|
+      @downs.each do |s|
+        result = db_connection.exec(s.statement)
+        puts "#{s.filename}: #{result.cmd_status}"
+      end
+    end
+  end
+  
+  def to_s
+    File.basename(@directory)
+  end
+  
   private
-
-   DataPiece = Struct.new(:filename, :statement)
-
-   # Fills the list of statements to execute from the information
+  
+  DataPiece = Struct.new(:filename, :statement)
+  
+  # Fills the list of statements to execute from the information
    # found by inspecting the directory contents
-   def populate()
-     require 'find'
-     Find.find(@directory) do |path|
+  def populate()
+    require 'find'
+    Find.find(@directory) do |path|
        if File.file?(path) && File.extname(path) == '.sql'
          data = DataPiece.new(path, File.read(path))
          if is_raws path
@@ -104,27 +100,27 @@ class DataSet
            @ups << data
          end
        end
-     end
-     
-     @ups.sort! do |x, y|
-       File.basename(x.filename) <=> File.basename(y.filename)
-     end
-   end
+    end
+    
+    @ups.sort! do |x, y|
+      File.basename(x.filename) <=> File.basename(y.filename)
+    end
+  end
 
   # Returns true if the configuration does not contain enough information
   # to connect to a database 
   def insufficient(config)
     config[:dbname].nil? 
   end
-
+  
   def is_ups(path)
     File.extname(path) == '.sql' && File.basename(path) != 'reset.sql'
   end
-
+  
   def is_downs(path)
     File.basename(path) == 'reset.sql'
   end
-
+  
   def is_raws(path)
     File.fnmatch?('*psql*', path)
   end
