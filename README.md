@@ -1,7 +1,7 @@
-SQL Loader
+sqlload
 ==========
 
-SQL Loader executes SQL scripts contained in a directory hierarchy into a PostgreSQL database.
+sqlload executes SQL scripts contained in a directory hierarchy into a PostgreSQL database.
 
 Usage
 -----
