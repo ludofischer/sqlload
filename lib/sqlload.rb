@@ -60,7 +60,7 @@ class DataSet
     end
     psql_count = 0
     @raws.each do |s|
-      exec({'PGPASSWORD' => @config[:password]}, "psql -h localhost -U #{@config[:user]} -d #{@config[:dbname]} < #{s.filename}")
+      system({'PGPASSWORD' => @config[:password]}, "psql -h localhost -U #{@config[:user]} -d #{@config[:dbname]} < #{s.filename}")
       psql_count += 1
     end
     puts "psql invoked #{psql_count} time(s)"
