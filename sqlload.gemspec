@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.description = 'sqlload inspects a directory hierarchy: for each subdirectory, sqlload offers to execute any SQL file, using the database specified in the JSON configuration.'
   s.authors = ['Ludovico Fischer']
   s.email = 'ludovico.fischer@lunatech.com'
-  s.homepage = 'https://github.com/ludovicofischer/sqlloader'
+  s.homepage = 'https://github.com/ludovicofischer/sqlload'
   s.add_runtime_dependency 'pg', '~> 0.13.0'
   s.files = ['lib/sqlload.rb', 'lib/sqlload/database.rb']
   s.executables << 'sqlload'
