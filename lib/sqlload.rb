@@ -60,6 +60,7 @@ class DataSet
     end
     psql_count = 0
     @raws.each do |s|
+      puts "Executing #{s.filename}"
       system({'PGPASSWORD' => @config[:password]}, "psql -h localhost -U #{@config[:user]} -d #{@config[:dbname]} < #{s.filename}")
       psql_count += 1
     end
