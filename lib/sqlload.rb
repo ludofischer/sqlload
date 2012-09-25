@@ -106,6 +106,10 @@ class DataSet
     @ups.sort! do |x, y|
       File.basename(x.filename) <=> File.basename(y.filename)
     end
+
+    @raws.sort! do |x, y|
+      File.basename(x.filename) <=> File.basename(y.filename)
+    end
   end
 
   # Returns true if the configuration does not contain enough information
